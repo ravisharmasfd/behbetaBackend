@@ -1,40 +1,62 @@
+const moment = require("moment");
+const { isToday } = require("../helper/helperFunction");
 const { createPayment, sendEmail, sendSms } = require("../helper/payment");
 const Invoice = require("../model/invoice");
 
-exports.createInvoice = async (req,res,next)=>{
+exports.createInvoice = async (req, res, next) => {
     try {
-        const {amount,country_code, mobile_no,name,remark,sendAtSMS,sendAtWhatsapp,sendAtMail,saveAsDraft,email,draftId,type,invoice_start_date,repeat_every,frequencyUnit} = req.body;
+        const { amount, country_code, mobile_no, name, remark, sendAtSMS, sendAtWhatsapp, sendAtMail, saveAsDraft, email, draftId, type, invoice_start_date, repeat_every, frequencyUnit, } = req.body;
         console.log("🚀 ~ exports.createInvoice= ~ amount:", amount)
         let newInvoice;
-        if(draftId){
-            newInvoice =  await Invoice.findOneAndUpdate({_id:draftId},{$set:{amount,mobile_no,name,remark,email,country_code,type,isDraft:saveAsDraft,invoice_start_date,repeat_every,frequencyUnit}});
+        if (draftId) {
+            newInvoice = await Invoice.findOneAndUpdate({ _id: draftId }, { $set: { amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit } });
         }
-        else{
+        else {
             newInvoice = new Invoice({
-                amount,mobile_no,name,remark,email,country_code,type,isDraft:saveAsDraft,invoice_start_date,repeat_every,frequencyUnit});
+                amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit, cronJobDone: true
+            });
             await newInvoice.save()
         }
-        if(saveAsDraft){
-            return  res.send({
-                message:"created successfully",
-                invoice:newInvoice,
+
+        if (saveAsDraft) {
+            return res.send({
+                message: "created successfully",
+                invoice: newInvoice,
                 // paymentResponse
             })
         }
-        if(sendAtMail){
-            const res = sendEmail(email)
+        if (type == 1) {
+            if (sendAtMail) {
+                const res = sendEmail(email)
+            }
+            if (sendAtSMS) {
+                const res = sendSms(country_code + mobile_no, "Your invoice is created testing by Navdeep Singh")
+            }
         }
-        if(sendAtSMS){
-            const res = sendSms(country_code+mobile_no,"Your invoice is created testing by Navdeep Singh")
+        if (isToday(invoice_start_date)) {
+            if (sendAtMail) {
+                const res = sendEmail(email)
+            }
+            if (sendAtSMS) {
+                const res = sendSms(country_code + mobile_no, "Your invoice is created testing by Navdeep Singh")
+            }
+            newInvoice.cronJobDone = true;
+
         }
+        const newDate = moment(invoice_start_date).add(repeat_every, frequencyUnit);
+        let nextInvoice = new Invoice({
+            amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit
+        });
+        await nextInvoice.save()
+
         // const {data} = await createPayment(amount,"BHD",newInvoice._id);
         //     res.send(data)
         res.send({
-            message:"created successfully",
-            invoice:newInvoice,
+            message: "created successfully",
+            invoice: newInvoice,
             // paymentResponse
         })
-        
+
     } catch (error) {
         next(error)
     }
@@ -92,7 +114,7 @@ exports.deleteInvoice = async (req, res, next) => {
         const { id } = req.params;
 
         // Find and delete the invoice
-        const deletedInvoice = await Invoice.findOneAndUpdate({_id:id},{$set:{isDeleted:true}});
+        const deletedInvoice = await Invoice.findOneAndUpdate({ _id: id }, { $set: { isDeleted: true } });
 
         if (!deletedInvoice) {
             return res.status(404).send({ message: "Invoice not found" });

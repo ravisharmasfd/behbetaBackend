@@ -57,7 +57,7 @@ const invoiceSchema = new mongoose.Schema({
   frequencyUnit: {
     type: String,
     default: 'week', 
-    enum:["week","month","year"]
+    enum:["day","week","month","year"]
   },
   status: {
     type: Number,
@@ -73,6 +73,10 @@ const invoiceSchema = new mongoose.Schema({
     type: Boolean
   },
   isDeleted:{
+    default: false,
+    type: Boolean
+  },
+  cronJobDone:{
     default: false,
     type: Boolean
   }
