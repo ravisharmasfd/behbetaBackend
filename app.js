@@ -13,8 +13,6 @@ const Invoice = require('./model/invoice');
 var app = express();
 app.use(cors())
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -42,7 +40,7 @@ app.use(function (err, req, res, next) {
 });
 
  // // cron job
- cron.schedule('* * * * *', async () => {
+ cron.schedule('0 10 * * *', async () => {
   console.log('Running a task every day at 10 AM');
  try{
   const startOfToday = moment().startOf('day').toDate();
