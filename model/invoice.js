@@ -16,7 +16,6 @@ const invoiceSchema = new mongoose.Schema({
   },
   repeat_every: {
     type: Number,
-    required: true,
     default: 0,
   },
   country_code: {
@@ -39,6 +38,12 @@ const invoiceSchema = new mongoose.Schema({
     default: 0,
     min:1,
   },
+  email: {
+    type: String,
+    required: true,
+    default: 0,
+    min:1,
+  },
   mobile_no: {
     type: String,
     required: true,
@@ -47,7 +52,12 @@ const invoiceSchema = new mongoose.Schema({
   remark: {
     type: String,
     required: true,
-    default: '', // Kept as a string to follow your Sequelize structure
+    default: '',
+  },
+  frequencyUnit: {
+    type: String,
+    default: 'week', 
+    enum:["week","month","year"]
   },
   status: {
     type: Number,
@@ -67,7 +77,7 @@ const invoiceSchema = new mongoose.Schema({
     type: Boolean
   }
 }, { 
-  timestamps: true // This will automatically add createdAt and updatedAt fields
+  timestamps: true 
 });
 
 const Invoice = mongoose.model('Invoice', invoiceSchema);

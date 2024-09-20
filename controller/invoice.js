@@ -3,15 +3,15 @@ const Invoice = require("../model/invoice");
 
 exports.createInvoice = async (req,res,next)=>{
     try {
-        const {amount,country_code, mobile_no,name,remark,sendAtSMS,sendAtWhatsapp,sendAtMail,saveAsDraft,email,draftId} = req.body;
+        const {amount,country_code, mobile_no,name,remark,sendAtSMS,sendAtWhatsapp,sendAtMail,saveAsDraft,email,draftId,type,invoice_start_date,repeat_every,frequencyUnit} = req.body;
         console.log("🚀 ~ exports.createInvoice= ~ amount:", amount)
         let newInvoice;
         if(draftId){
-            newInvoice =  await Invoice.findOneAndUpdate({_id:id},{$set:{saveAsDraft:false}});
+            newInvoice =  await Invoice.findOneAndUpdate({_id:draftId},{$set:{amount,mobile_no,name,remark,email,country_code,type,isDraft:saveAsDraft,invoice_start_date,repeat_every,frequencyUnit}});
         }
         else{
             newInvoice = new Invoice({
-                amount,mobile_no,name,remark,email,country_code,type:1,isDraft:saveAsDraft});
+                amount,mobile_no,name,remark,email,country_code,type,isDraft:saveAsDraft,invoice_start_date,repeat_every,frequencyUnit});
             await newInvoice.save()
         }
         if(saveAsDraft){
