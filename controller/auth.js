@@ -4,15 +4,15 @@ const { jwtSecret } = require('../config/env');
 
 const JWT_SECRET = jwtSecret
 
-// Register API
-exports.register =async (req, res) => {
-  const { first_name, last_name, email, password, phone_number, role } = req.body;
+// Register API for admin
+exports.register =async (req, res, next) => {
+  const { first_name, last_name, email, password, phone_number } = req.body;
 
   try {
     // Check if the user already exists
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ msg: 'User already exists' });
+      return res.status(400).json({ message: 'User already exists' });
     }
 
     // Create a new user
@@ -22,38 +22,11 @@ exports.register =async (req, res) => {
       email,
       password,
       phone_number,
-      role
+      role: 1
     });
 
     // Save the user to the database
     await user.save();
-
-    // Create JWT Token
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET);
-
-    res.status(201).json({ token });
-  } catch (error) {
-    console.error(error);
-    next(error)
-  }
-}
-
-// Login API
-exports.login =  async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    // Find the user by email
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
-    }
-
-    // Compare password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
-    }
 
     // Create JWT Token
     const token = jwt.sign({ userId: user._id }, JWT_SECRET);
@@ -65,20 +38,63 @@ exports.login =  async (req, res) => {
   }
 }
 
-// Middleware to protect routes
-exports.authMiddleware = (req, res, next) => {
-  const token = req.header('Authorization');
-  if (!token) {
-    return res.status(401).json({ msg: 'No token, authorization denied' });
-  }
+// Login API
+exports.login =  async (req, res,next) => {
+  const { email, password } = req.body;
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded.userId;
-    next();
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Compare password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Create JWT Token
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET);
+    let data = user.toObject();
+    delete data.password
+    res.json({ token,data });
   } catch (error) {
-    res.status(401).json({ msg: 'Token is not valid' });
+    console.error(error);
+    next(error)
   }
-};
+}
+
+// Middleware to protect routes
+exports.authMiddleware = (role)=>{
+  return  async (req, res, next) => {
+    const token = req.header('x-access-token');
+    if (!token) {
+      return res.status(401).json({ message: 'No token, authorization denied' });
+    }
+
+  
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      req.userId = decoded._id;
+      const user = await User.findById(req.userId);
+      if(!user){
+        return res.status(409).json({
+          message:"User not found"
+        })
+      }
+      if(user?.role != role){
+        return res.status(409).json({
+          message:"Role not have access"
+        })
+      }
+      req.user = user
+      next();
+    } catch (error) {
+      res.status(401).json({ message: 'Token is not valid' });
+    }
+  };
+}
 
 

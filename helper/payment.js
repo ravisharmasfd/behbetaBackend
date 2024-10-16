@@ -39,8 +39,9 @@ exports.sendEmail = async(email, content) => {
         from: "contact@sportmeetapp.com", // sender address
         to: email, // recipient address
         subject: "Invoice Created Successfully", // Subject line
-        text: "Your invoice has been created successfully.", // plain text body
-        html: `<p>Your invoice has been created successfully.</p>` // HTML body
+        text: "You have received an order from TRIP BEE TRAVEL AND TOURISM W.L.L for an amount of 103 BHD.\n Pay using: https://www.bahbeta.com/a/p/g/V0IyMzA5MjM2OTIxNTQ4NS0xMzA5NDE", // plain text body
+        html: `<p>You have received an order from TRIP BEE TRAVEL AND TOURISM W.L.L for an amount of 103 BHD.</p>
+        <p>Pay using: https://www.bahbeta.com/a/p/g/V0IyMzA5MjM2OTIxNTQ4NS0xMzA5NDE</p>` // HTML body
       };
      const response = await transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
@@ -75,7 +76,7 @@ exports.sendEmail = async(email, content) => {
             {
               udh: "0",
               coding: 1,
-              text: messageText, // The SMS text content
+              text: "You have received an order from TRIP BEE TRAVEL AND TOURISM W.L.L for an amount of 103 BHD.\n Pay using: https://www.bahbeta.com/a/p/g/V0IyMzA5MjM2OTIxNTQ4NS0xMzA5NDE", // The SMS text content
               property: 0,
               id: "ko95k321333891f160a007dhttBAHBETA80T", // A unique identifier for the message
               addresses: [

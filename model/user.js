@@ -4,12 +4,12 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
   first_name: {
     type: String,
-    required: true,
-    trim: true
+    trim: true,
+    default:""
   },
   last_name: {
     type: String,
-    required: true,
+    default:"",
     trim: true
   },
   email: {
@@ -17,7 +17,8 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
-    lowercase: true
+    lowercase: true,
+    match: [/\S+@\S+\.\S+/, 'Invalid email format'],
   },
   password: {
     type: String,
@@ -25,7 +26,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: Number,
-    required: true
+    required: true // 1 for admin 2 for merchant
   },
   phone_number: {
     type: String,
@@ -35,6 +36,87 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 1
   },
+  businessName: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 40,
+  },
+  registeredName: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 40,
+  },
+  country: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  region: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  tradeLicenseNo: {
+    type: String,
+    trim: true,
+    maxlength: 20,
+  },
+  bankName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  iban: {
+    type: String,
+    required: true,
+    maxlength: 34,
+    trim: true,
+  },
+  merchantId: {
+    type: String,
+    required: true,
+    maxlength: 40,
+    unique:true,
+    trim: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 8,
+    maxlength: 25,
+  },
+  username: {
+    type: String,
+    required: true,
+    unique:true,
+    maxlength: 35,
+  },
+  category: {
+    type: String,
+    required: true,
+  },
+  website: {
+    type: String,
+    default: null,
+  },
+  instagramUrl: {
+    type: String,
+    default: null,
+  },
+  facebookUrl: {
+    type: String,
+    default: null,
+  },
+  apiKey: {
+    type: String,
+    required: true,
+  },
+  isDeleted:{
+    type: Boolean,
+    default:false,
+  }
 }, { timestamps: true });
 
 // Password hashing before saving

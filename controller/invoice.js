@@ -5,8 +5,8 @@ const Invoice = require("../model/invoice");
 
 exports.createInvoice = async (req, res, next) => {
     try {
-        const { amount, country_code, mobile_no, name, remark, sendAtSMS, sendAtWhatsapp, sendAtMail, saveAsDraft, email, draftId, type, invoice_start_date, repeat_every, frequencyUnit, } = req.body;
-        console.log("🚀 ~ exports.createInvoice= ~ amount:", amount)
+        const { amount, country_code, mobile_no, name, remark, sendAtSMS, sendAtWhatsapp, sendAtMail, saveAsDraft, email, draftId, type, invoice_start_date, repeat_every, frequencyUnit } = req.body;
+        
         let newInvoice;
         if (draftId) {
             newInvoice = await Invoice.findOneAndUpdate({ _id: draftId }, { $set: { amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit } });
@@ -27,18 +27,23 @@ exports.createInvoice = async (req, res, next) => {
         }
         if (type == 1) {
             if (sendAtMail) {
-                const res = sendEmail(email)
+                const res = await sendEmail(email)
             }
             if (sendAtSMS) {
-                const res = sendSms(country_code + mobile_no, "Your invoice is created testing by Navdeep Singh")
+                const res = await sendSms(country_code + mobile_no, "Your invoice is created testing by Navdeep Singh")
             }
+            return res.send({
+                message: "created successfully",
+                invoice: newInvoice,
+                // paymentResponse
+            })
         }
         if (isToday(invoice_start_date)) {
             if (sendAtMail) {
-                const res = sendEmail(email)
+                const res = await sendEmail(email)
             }
             if (sendAtSMS) {
-                const res = sendSms(country_code + mobile_no, "Your invoice is created testing by Navdeep Singh")
+                const res = await sendSms(country_code + mobile_no, "Your invoice is created testing by Navdeep Singh")
             }
             newInvoice.cronJobDone = true;
 
