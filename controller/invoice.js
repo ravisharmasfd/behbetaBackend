@@ -6,14 +6,14 @@ const Invoice = require("../model/invoice");
 exports.createInvoice = async (req, res, next) => {
     try {
         const { amount, country_code, mobile_no, name, remark, sendAtSMS, sendAtWhatsapp, sendAtMail, saveAsDraft, email, draftId, type, invoice_start_date, repeat_every, frequencyUnit } = req.body;
-        
+        let user_id = req?.user?._id
         let newInvoice;
         if (draftId) {
-            newInvoice = await Invoice.findOneAndUpdate({ _id: draftId }, { $set: { amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit } });
+            newInvoice = await Invoice.findOneAndUpdate({ _id: draftId,user_id }, { $set: { amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit } });
         }
         else {
             newInvoice = new Invoice({
-                amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit, cronJobDone: true
+                amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit, user_id,cronJobDone: true
             });
             await newInvoice.save()
         }
@@ -43,14 +43,14 @@ exports.createInvoice = async (req, res, next) => {
                 const res = await sendEmail(email)
             }
             if (sendAtSMS) {
-                const res = await sendSms(country_code + mobile_no, "Your invoice is created testing by Navdeep Singh")
+                const res = await sendSms(country_code + mobile_no, "Your invoice is created ")
             }
             newInvoice.cronJobDone = true;
 
         }
         const newDate = moment(invoice_start_date).add(repeat_every, frequencyUnit);
         let nextInvoice = new Invoice({
-            amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit
+            amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit,user_id
         });
         await nextInvoice.save()
 
@@ -69,12 +69,13 @@ exports.createInvoice = async (req, res, next) => {
 
 exports.getInvoices = async (req, res, next) => {
     try {
-        const { page = 1, limit = 10, type, customerName } = req.query;
+        const { page = 1, limit = 10, type, customerName,user_id } = req.query;
 
         // Create query object
         const query = {
             isDraft: type === "drafts",
-            isDeleted: false
+            isDeleted: false,
+            user_id
         };
 
         // If customerName is provided, add it to the query with a case-insensitive search
@@ -119,7 +120,7 @@ exports.deleteInvoice = async (req, res, next) => {
         const { id } = req.params;
 
         // Find and delete the invoice
-        const deletedInvoice = await Invoice.findOneAndUpdate({ _id: id }, { $set: { isDeleted: true } });
+        const deletedInvoice = await Invoice.findOneAndUpdate({ _id: id,user_id:req.user._id }, { $set: { isDeleted: true } });
 
         if (!deletedInvoice) {
             return res.status(404).send({ message: "Invoice not found" });

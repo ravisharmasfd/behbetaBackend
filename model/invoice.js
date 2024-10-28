@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const invoiceSchema = new mongoose.Schema({
   user_id: {
     type: mongoose.Types.ObjectId,
-    ref:"User"
+    ref:"User",
+    require:true,
   },
   invoice_start_date: {
     type: Date,

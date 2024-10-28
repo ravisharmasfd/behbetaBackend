@@ -39,13 +39,13 @@ exports.createMerchant =async (req, res, next) => {
       const skip = (page - 1) * limit;
   
       // Fetch merchants with pagination
-      const merchants = await User.find({ role: 2 , isDeleted:false}) // Assuming role 2 means Merchant
+      const merchants = await User.find({ role: 2 , isDeleted:false},{password:0}) // Assuming role 2 means Merchant
         .skip(skip)
         .limit(limit)
         .exec();
   
       // Count total documents for pagination info
-      const total = await User.countDocuments({ role: 2 });
+      const total = await User.countDocuments({ role: 2,isDeleted:false });
   
       res.json({
         data: merchants,

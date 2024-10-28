@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     required: true // 1 for admin 2 for merchant
   },
+  countryCode:{
+    type: String,
+    required: true
+  },
   phone_number: {
     type: String,
     required: true

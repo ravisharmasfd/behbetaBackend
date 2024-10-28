@@ -7,7 +7,7 @@ const { authMiddleware } = require('../controller/auth.js');
 /* GET home page. */
 router.use("/admin",authMiddleware(1), adminRouter)
 router.use("/auth", authRouter)
-router.use("/invoice", invoiceRouter)
+router.use("/invoice",authMiddleware(2), invoiceRouter)
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
