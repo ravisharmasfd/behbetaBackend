@@ -1,6 +1,6 @@
-var express = require('express');
+let express = require('express');
 const { register, login } = require('../controller/auth');
-var router = express.Router();
+let router = express.Router();
 
 /* GET users listing. */
 router.post('/register', register);

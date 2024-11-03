@@ -1,4 +1,5 @@
 const User = require("../../model/user");
+const bcrypt = require('bcryptjs');
 
 exports.createMerchant =async (req, res, next) => {
     try {
@@ -97,4 +98,29 @@ exports.createMerchant =async (req, res, next) => {
     }
   };
   
-    
+  exports.updatePassword = async (req, res, next) => {
+    try {
+      const userId = req.params.id;
+      const { password } = req.body;
+  
+      // Find the user by ID
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Validate the new password
+      if (password.length < 8 || password.length > 25) {
+        return res.status(400).json({ message: 'New password must be between 8 and 25 characters long' });
+      }
+  
+      // Hash the new password and save
+      let updatePassword = await bcrypt.hash(password, 10);
+      const userUpdate = await User.findByIdAndUpdate(userId,{$set:{password:updatePassword},},{new:true})
+  
+      res.json({ message: 'Password updated successfully',data:userUpdate });
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
+  };

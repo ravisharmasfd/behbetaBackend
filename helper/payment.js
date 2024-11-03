@@ -3,7 +3,7 @@ const nodemailer =  require("nodemailer")
 exports. createPayment = async (amount, currency, orderID) => {
     const paymentGatewayURL = 'https://afs.gateway.mastercard.com/ma';
     const merchantID = 'TEST100273870';
-    const apiPassword = 'password12#';
+    const apiPassword = 'Bahbeta@2024';
     try {
         const response = await axios.post(`${paymentGatewayURL}/order`, {
             merchant: {

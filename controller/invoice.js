@@ -69,8 +69,8 @@ exports.createInvoice = async (req, res, next) => {
 
 exports.getInvoices = async (req, res, next) => {
     try {
-        const { page = 1, limit = 10, type, customerName,user_id } = req.query;
-
+        const { page = 1, limit = 10, type, customerName, } = req.query;
+        let user_id = req?.user?._id
         // Create query object
         const query = {
             isDraft: type === "drafts",

@@ -1,9 +1,11 @@
-var express = require('express');
+let express = require('express');
 const adminMerchantRouter = require('./merchant');
 const profileRouter = require('./profile');
-var adminRouter = express.Router();
+const adminInvoiceRouter = require('./invoice');
+let adminRouter = express.Router();
 
 adminRouter.use("/merchant", adminMerchantRouter)
 adminRouter.use("/profile", profileRouter)
+adminRouter.use("/invoice", adminInvoiceRouter)
 
 module.exports = adminRouter;

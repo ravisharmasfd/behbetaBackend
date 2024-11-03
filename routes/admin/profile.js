@@ -1,7 +1,7 @@
-var express = require('express');
+let express = require('express');
 const { getProfile } = require('../../controller/admin/profile');
 
-var profileRouter = express.Router();
+let profileRouter = express.Router();
 
 profileRouter.get("/", getProfile)
 

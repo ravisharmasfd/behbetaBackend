@@ -1,4 +1,6 @@
-const getProfile = async (req, res, next) => {
+
+
+  const getProfile = async (req, res, next) => {
     try {
       const adminData = req.user.toObject();
       delete adminData.password;

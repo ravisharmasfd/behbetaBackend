@@ -1,7 +1,7 @@
-var express = require('express');
+let express = require('express');
 const { register, login } = require('../controller/auth');
 const { createInvoice, getInvoices, deleteInvoice } = require('../controller/invoice');
-var invoiceRouter = express.Router();
+let invoiceRouter = express.Router();
 
 /* GET users listing. */
 invoiceRouter.post('/', createInvoice);
