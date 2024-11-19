@@ -6,19 +6,25 @@ const Invoice = require("../model/invoice");
 exports.createInvoice = async (req, res, next) => {
     try {
         const { amount, country_code, mobile_no, name, remark, sendAtSMS, sendAtWhatsapp, sendAtMail, saveAsDraft, email, draftId, type, invoice_start_date, repeat_every, frequencyUnit } = req.body;
+        console.log("🚀 ~ exports.createInvoice= ~ type:", type)
         let user_id = req?.user?._id
         let newInvoice;
+        console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 1)
         if (draftId) {
             newInvoice = await Invoice.findOneAndUpdate({ _id: draftId,user_id }, { $set: { amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit } });
+            console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 2)
         }
         else {
             newInvoice = new Invoice({
                 amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit, user_id,cronJobDone: true
             });
-            await newInvoice.save()
+            await newInvoice.save();
+            console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 3)
         }
+        const url = `${"http://localhost:3000/payment?sessionId="}${newInvoice._id}`
 
         if (saveAsDraft) {
+            console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 4)
             return res.send({
                 message: "created successfully",
                 invoice: newInvoice,
@@ -26,28 +32,38 @@ exports.createInvoice = async (req, res, next) => {
             })
         }
         if (type == 1) {
+            console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 5)
+            
             if (sendAtMail) {
-                const res = await sendEmail(email)
+                console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 6)
+                const res = await sendEmail(email,url,amount,req.user?.businessName)
             }
             if (sendAtSMS) {
-                const res = await sendSms(country_code + mobile_no, "Your invoice is created testing by Navdeep Singh")
+                console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 6)
+                const res = await sendSms(country_code + mobile_no, `You have received an order from ${req.user?.businessName} for an amount of ${amount} BHD. Pay using:${url}`)
             }
+            console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 7)
             return res.send({
                 message: "created successfully",
                 invoice: newInvoice,
+                url
                 // paymentResponse
             })
         }
         if (isToday(invoice_start_date)) {
+            console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 8)
             if (sendAtMail) {
-                const res = await sendEmail(email)
+                console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 9)
+                const res = await sendEmail(email,url,amount,req.user?.businessName)
             }
             if (sendAtSMS) {
-                const res = await sendSms(country_code + mobile_no, "Your invoice is created ")
+                console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 10)
+                const res = await sendSms(country_code + mobile_no, `You have received an order from ${req.user?.businessName} for an amount of ${amount} BHD. Pay using:${url}`)
             }
             newInvoice.cronJobDone = true;
 
         }
+        console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 11)
         const newDate = moment(invoice_start_date).add(repeat_every, frequencyUnit);
         let nextInvoice = new Invoice({
             amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit,user_id
@@ -59,6 +75,7 @@ exports.createInvoice = async (req, res, next) => {
         res.send({
             message: "created successfully",
             invoice: newInvoice,
+            url
             // paymentResponse
         })
 
@@ -112,8 +129,32 @@ exports.getInvoices = async (req, res, next) => {
         next(error);
     }
 };
-
-
+exports.generatePaymentSeasonId = async (req,res,next)=>{
+    try {
+        const id = req.params.id;
+        let user_id = req?.user?._id
+        // Create query object
+        const query = {
+            _id:id,
+            isDraft: false,
+            isDeleted: false,
+            user_id,
+        };
+        const invoice = await Invoice.findOne(query).populate("user_id");
+        if(!invoice){
+            return res.status(404).json({
+                message:"Invoice not found"
+            })
+        }
+        const season = await createPayment(invoice?.amount,"BHD",invoice?.user_id?.apiKey,invoice.user_id?.businessName,id,"invoice");
+        res.send({
+            data:invoice,
+            season
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 exports.deleteInvoice = async (req, res, next) => {
     try {

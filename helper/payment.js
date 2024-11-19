@@ -1,33 +1,49 @@
-const axios =  require("axios")
+const axios = require('axios');
+const base64 = require('base-64');
 const nodemailer =  require("nodemailer")
-exports. createPayment = async (amount, currency, orderID) => {
-    const paymentGatewayURL = 'https://afs.gateway.mastercard.com/ma';
-    const merchantID = 'TEST100273870';
-    const apiPassword = 'Bahbeta@2024';
+exports. createPayment = async (amount, currency,apiPassword,merchantName,orderId,description) => {
+  const merchantID = 'TEST100273870';
+  // const apiPassword = '7ebe83414d4b2608412bcff38d54764a';
+  // const merchantName = 'Navdeep';
+  // const orderId = '<order_ID>';
+  // const description = '<description_of_order>';
+  const authString = `merchant.${merchantID}:${apiPassword}`;
+  const encodedAuthString = base64.encode(authString);
+  const url = `https://afs.gateway.mastercard.com/api/rest/version/72/merchant/${merchantID}/session`;
     try {
-        const response = await axios.post(`${paymentGatewayURL}/order`, {
+      const data = {
+        apiOperation: "INITIATE_CHECKOUT",
+        interaction: {
+            operation: "PURCHASE",
             merchant: {
-                id: merchantID,
-                password: apiPassword,
-            },
-            order: {
-                amount,
-                currency,
-                reference: orderID,
-            },
-        });
+                name: merchantName
+            }
+        },
+        order: {
+            currency: currency,
+            amount: amount,
+            id: orderId,
+            description: description
+        }
+    };
+    const response = await axios.post(url, data, {
+      headers: {
+          'Content-Type': 'text/plain',
+          'Authorization': `Basic ${encodedAuthString}`
+      }
+  })
         console.log("🚀 ~ exports.createPayment= ~ response:", response)
                 
-        return response
+        return response.data
     } catch (error) {
         console.log("🚀 ~ createPayment ~ error:", error)
         throw error
         
     }
 }
-exports.sendEmail = async(email, content) => {
+exports.sendEmail = async(email, url,amount,businessName) => {
     try {
-      var transporter = nodemailer.createTransport({
+      let transporter = nodemailer.createTransport({
         host: "smtp.postmarkapp.com",
         port: 587,
         auth: {
@@ -39,17 +55,12 @@ exports.sendEmail = async(email, content) => {
         from: "contact@sportmeetapp.com", // sender address
         to: email, // recipient address
         subject: "Invoice Created Successfully", // Subject line
-        text: "You have received an order from TRIP BEE TRAVEL AND TOURISM W.L.L for an amount of 103 BHD.\n Pay using: https://www.bahbeta.com/a/p/g/V0IyMzA5MjM2OTIxNTQ4NS0xMzA5NDE", // plain text body
-        html: `<p>You have received an order from TRIP BEE TRAVEL AND TOURISM W.L.L for an amount of 103 BHD.</p>
-        <p>Pay using: https://www.bahbeta.com/a/p/g/V0IyMzA5MjM2OTIxNTQ4NS0xMzA5NDE</p>` // HTML body
+        text: `You have received an order from ${businessName} for an amount of ${amount} BHD.\n Pay using: ${url}`, // plain text body
+        html: `<p>You have received an order from businessName for an amount of ${amount} BHD.</p>
+        <p>Pay using: ${url}</p>` // HTML body
       };
-     const response = await transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log("Error sending email:", error);
-        } else {
-          console.log("Email sent:", info.response);
-        }
-      });
+     const response = await transporter.sendMail(mailOptions);
+      console.log("🚀 ~ exports.sendEmail=async ~ response:", response)
       return response;
     } catch (err) {
       throw err;
