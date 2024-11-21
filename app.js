@@ -55,7 +55,7 @@ app.use(function (err, req, res, next) {
     type: 2,
     cronJobDone: false
 
-  })
+  }).populate("user_id")
   console.log("🚀 ~ cron.schedule ~ invoices:", invoices)
   let updates = await Invoice.updateMany({
     startDate: {
@@ -76,6 +76,7 @@ app.use(function (err, req, res, next) {
   const sendEmailPromise = [];
   invoices.forEach(inv => {
     const body = inv.toObject();
+    const url = `${"http://localhost:3000/payment?sessionId="}${inv._id}`
     const newDate = moment(body.invoice_start_date).add(repeat_every, frequencyUnit);
     let nextInvoice = new Invoice({
       ...body, invoice_start_date: newDate,
@@ -83,10 +84,10 @@ app.use(function (err, req, res, next) {
     newInvoicesPromise.push(nextInvoice.save());
     if (body.sendAtMail) {
 
-      sendSmsPromise.push(sendEmail(body.email))
+      sendSmsPromise.push(sendEmail(body.email,url,body.amount,body?.user_id?.businessName))
     }
     if (body.sendAtSMS) {
-      sendSmsPromise(sendSms(body.country_code + body.mobile_no, "Your invoice is created testing by Navdeep Singh"))
+      sendSmsPromise(sendSms(body?.country_code + body?.mobile_no,  `You have received an order from ${body?.user_id?.businessName} for an amount of ${body?.amount} BHD. Pay using:${url}`))
     }
   })
   const invoicesData = await Promise.all(newInvoicesPromise);
