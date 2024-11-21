@@ -1,8 +1,9 @@
 const axios = require('axios');
 const base64 = require('base-64');
-const nodemailer =  require("nodemailer")
+const nodemailer =  require("nodemailer");
+const { merchantId, mailHost, mailPort, mailUser, mailPass, mail, smsClientID, smsPass, smsToken } = require('../config/env');
 exports. createPayment = async (amount, currency,apiPassword,merchantName,orderId,description) => {
-  const merchantID = 'TEST100273870';
+  const merchantID = merchantId; 
   // const apiPassword = '7ebe83414d4b2608412bcff38d54764a';
   // const merchantName = 'Navdeep';
   // const orderId = '<order_ID>';
@@ -44,15 +45,15 @@ exports. createPayment = async (amount, currency,apiPassword,merchantName,orderI
 exports.sendEmail = async(email, url,amount,businessName) => {
     try {
       let transporter = nodemailer.createTransport({
-        host: "smtp.postmarkapp.com",
-        port: 587,
+        host: mailHost,
+        port: mailPort,
         auth: {
-          user: "41cc5d94-4628-4eee-bef3-f525141a4910",
-          pass: "41cc5d94-4628-4eee-bef3-f525141a4910"
+          user: mailUser,
+          pass: mailPass
         }
       });
       let mailOptions = {
-        from: "contact@sportmeetapp.com", // sender address
+        from: mail, // sender address
         to: email, // recipient address
         subject: "Invoice Created Successfully", // Subject line
         text: `You have received an order from ${businessName} for an amount of ${amount} BHD.\n Pay using: ${url}`, // plain text body
@@ -70,10 +71,9 @@ exports.sendEmail = async(email, url,amount,businessName) => {
   exports.sendSms= async (phoneNumber, messageText) => {
     try {
       console.log("phone number is",phoneNumber.slice(1))
-      const clientId = "bahbeta80t6mi77915tv1wun";
-      const password = "dvje1p2hzvyk6uc7bwcwi3pwdasi7iph";
-      const token =
-        "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJbmZpbml0byIsImlhdCI6MTcyNTU1NTY0Nywic3ViIjoiYmFoYmV0YTgwdDZtaTc3OTE1dHYxd3VuIn0.5XjMQ2ItKbu3qcQf4B9ZRi9h_4VEtgHthgufeYT6uP8";
+      const clientId = smsClientID;
+      const password = smsPass;
+      const token = smsToken;
 
       // Construct the data payload
       const data = {
@@ -87,7 +87,7 @@ exports.sendEmail = async(email, url,amount,businessName) => {
             {
               udh: "0",
               coding: 1,
-              text: "You have received an order from TRIP BEE TRAVEL AND TOURISM W.L.L for an amount of 103 BHD.\n Pay using: https://www.bahbeta.com/a/p/g/V0IyMzA5MjM2OTIxNTQ4NS0xMzA5NDE", // The SMS text content
+              text: messageText, // The SMS text content
               property: 0,
               id: "ko95k321333891f160a007dhttBAHBETA80T", // A unique identifier for the message
               addresses: [
