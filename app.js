@@ -11,20 +11,67 @@ const moment = require("moment");
 const Invoice = require('./model/invoice');
 
 var app = express();
+
 app.use(cors())
 // view engine setup
-
+// app.set('view engine', 'ejs');
+// app.set('views', path.join(__dirname, 'views'));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.get("/", (req, res) => {
   res.sendFile("index.html", { root: path.join(__dirname, "public") });
 });
 app.use('/api', indexRouter);
+// app.get('/payment2/:sessionId', (req, res) => {
+//   const { sessionId } = req.params;
 
-// catch 404 and forward to error handler
+//   // Render an HTML page for the payment process
+//   res.send(`
+//     <html>
+//       <head>
+//         <script src="https://afs.gateway.mastercard.com/static/checkout/checkout.min.js" data-error="errorCallback" data-cancel="cancelCallback"
+//         data-complete="completeCallback"
+//         ></script>
+//         <script type="text/javascript">
+//           function errorCallback(error) {
+//             console.log("error is ====>>>",JSON.stringify(error));
+//           }
+
+//           function cancelCallback() {
+//             console.log("invoiceRouter cancel",'Payment cancelled');
+//           }
+//           function completeCallback(data) {
+//       console.log('Payment completed',data);
+//     }
+
+//           // Configuring checkout session
+//           Checkout.configure({
+//             session: {
+//               id: '${sessionId}'  // Using the session ID passed from the server
+//             }
+//           });
+//         </script>
+//       </head>
+//       <body>
+//         <div id="embed-target"></div>
+//         <input type="button" value="Pay with Embedded Page" onclick="Checkout.showEmbeddedPage('#embed-target');" />
+//         <input type="button" value="Pay with Payment Page" onclick="Checkout.showPaymentPage();" />
+//       </body>
+//     </html>
+//   `);
+// });
+
+// // catch 404 and forward to error handler
+// app.get('/payment/:sessionId', (req, res) => {
+//   const { sessionId } = req.params;
+
+//   // Render the EJS template for the payment page
+//   res.render('payment', { sessionId });  // Pass the sessionId to the EJS template
+// });
 app.use(function (req, res, next) {
   next(res.status(404).json({message:"Not Found"}));
 });

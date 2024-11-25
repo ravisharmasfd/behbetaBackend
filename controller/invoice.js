@@ -1,6 +1,6 @@
 const moment = require("moment");
 const { isToday } = require("../helper/helperFunction");
-const { createPayment, sendEmail, sendSms } = require("../helper/payment");
+const { createPayment, sendEmail, sendSms, getOrderStatus } = require("../helper/payment");
 const Invoice = require("../model/invoice");
 
 exports.createInvoice = async (req, res, next) => {
@@ -132,13 +132,12 @@ exports.getInvoices = async (req, res, next) => {
 exports.generatePaymentSeasonId = async (req,res,next)=>{
     try {
         const id = req.params.id;
-        let user_id = req?.user?._id
+        console.log("🚀 ~ exports.generatePaymentSeasonId= ~ id2:", id)
         // Create query object
         const query = {
             _id:id,
             isDraft: false,
             isDeleted: false,
-            user_id,
         };
         const invoice = await Invoice.findOne(query).populate("user_id");
         if(!invoice){
@@ -146,10 +145,55 @@ exports.generatePaymentSeasonId = async (req,res,next)=>{
                 message:"Invoice not found"
             })
         }
+        if(invoice?.status == 2){
+            invoice.status = 2;
+            await invoice.save()
+            return res.status(400).json({
+                message:"Payment already is completed for this invoice"
+            })
+        }
+        const result = await getOrderStatus(invoice?.user_id?.apiKey,invoice._id);
+        if(result?.result == 'SUCCESS'){
+            invoice.status = 2;
+            await invoice.save()
+            return res.status(400).json({
+                message:"Payment is already completed"
+            })
+        }
+        console.log("🚀 ~ exports.generatePaymentSeasonId= ~ result:", result)
         const season = await createPayment(invoice?.amount,"BHD",invoice?.user_id?.apiKey,invoice.user_id?.businessName,id,"invoice");
         res.send({
             data:invoice,
             season
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+exports.checkPaymentStatus = async (req,res,next)=>{
+    try {
+        const id = req.params.id;
+        console.log("🚀 ~ exports.checkPaymentStatus= ~ id:", id)
+        // Create query object
+        const query = {
+            _id:id,
+            isDraft: false,
+            isDeleted: false,
+        };
+        const invoice = await Invoice.findOne(query).populate("user_id");
+        if(!invoice){
+            return res.status(404).json({
+                message:"Invoice not found"
+            })
+        }
+        const result = await getOrderStatus(invoice?.user_id?.apiKey,invoice._id);
+        if(result?.result == 'SUCCESS'){
+            invoice.status = 2;
+            await invoice.save()
+        }
+        res.send({
+            data:invoice,
+            result
         })
     } catch (error) {
         next(error)

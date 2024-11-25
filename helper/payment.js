@@ -33,12 +33,52 @@ exports. createPayment = async (amount, currency,apiPassword,merchantName,orderI
           'Authorization': `Basic ${encodedAuthString}`
       }
   })
-        console.log("🚀 ~ exports.createPayment= ~ response:", response)
+        // console.log("🚀 ~ exports.createPayment= ~ response:", response)
                 
         return response.data
     } catch (error) {
         console.log("🚀 ~ createPayment ~ error:", error)
         throw error
+        
+    }
+}
+exports. getOrderStatus = async (apiPassword,orderId) => {
+  console.log("🚀 ~ exports.getOrderStatus= ~ apiPassword,orderId:", apiPassword,orderId)
+  const merchantID = merchantId; 
+  // const apiPassword = '7ebe83414d4b2608412bcff38d54764a';
+  // const merchantName = 'Navdeep';
+  // const orderId = '<order_ID>';
+  // const description = '<description_of_order>';
+  const authString = `merchant.${merchantID}:${apiPassword}`;
+  const encodedAuthString = base64.encode(authString);
+  const url = `https://afs.gateway.mastercard.com/api/rest/version/100/merchant/${merchantID}/order/${orderId}`;
+    try {
+    //   const data = {
+    //     apiOperation: "INITIATE_CHECKOUT",
+    //     interaction: {
+    //         operation: "PURCHASE",
+    //         merchant: {
+    //             name: merchantName
+    //         }
+    //     },
+    //     order: {
+    //         currency: currency,
+    //         amount: amount,
+    //         id: orderId,
+    //         description: description
+    //     }
+    // };
+    const response = await axios.get(url, {
+      headers: {
+        'Content-Type': 'text/plain',
+        'Authorization': `Basic ${encodedAuthString}`
+    }
+  })
+                
+        return response.data
+    } catch (error) {
+        // console.log("🚀 ~ createPayment ~ error:", error)
+        // throw error
         
     }
 }
@@ -58,7 +98,9 @@ exports.sendEmail = async(email, url,amount,businessName) => {
         subject: "Invoice Created Successfully", // Subject line
         text: `You have received an order from ${businessName} for an amount of ${amount} BHD.\n Pay using: ${url}`, // plain text body
         html: `<p>You have received an order from businessName for an amount of ${amount} BHD.</p>
-        <p>Pay using: ${url}</p>` // HTML body
+        <p>Pay using: </p>
+        <a href=${url}>click here</a>
+        ` // HTML body
       };
      const response = await transporter.sendMail(mailOptions);
       console.log("🚀 ~ exports.sendEmail=async ~ response:", response)
