@@ -80,7 +80,12 @@ const invoiceSchema = new mongoose.Schema({
   cronJobDone:{
     default: false,
     type: Boolean
-  }
+  },
+  mainRecInvoice: {
+    type: mongoose.Types.ObjectId,
+    ref:"Invoice",
+    default:null,
+  },
 }, { 
   timestamps: true 
 });

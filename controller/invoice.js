@@ -66,8 +66,7 @@ exports.createInvoice = async (req, res, next) => {
         console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 11)
         const newDate = moment(invoice_start_date).add(repeat_every, frequencyUnit);
         let nextInvoice = new Invoice({
-            amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit,user_id
-        });
+            amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit,user_id});
         await nextInvoice.save()
 
         // const {data} = await createPayment(amount,"BHD",newInvoice._id);
@@ -212,6 +211,91 @@ exports.deleteInvoice = async (req, res, next) => {
         }
 
         res.send({ message: "Invoice deleted successfully", invoice: deletedInvoice });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.invoiceStats = async (req, res, next) => {
+    try {
+        let user_id = req?.user?._id
+
+
+        // Fetch invoices with pagination
+        const draftInvoiceTotal = await Invoice.aggregate([
+            {
+              $match: {
+                isDraft: true,
+                isDeleted: false,
+                user_id: user_id // Match the specific user
+              }
+            },
+            {
+              $group: {
+                _id: null, // No grouping key, so all documents are aggregated together
+                totalAmount: { $sum: "$amount" } // Sum up the 'amount' field
+              }
+            }
+          ]);
+          const totalRevenue = await Invoice.aggregate([
+            {
+              $match: {
+                status:2,
+                user_id: user_id // Match the specific user
+              }
+            },
+            {
+              $group: {
+                _id: null, // No grouping key, so all documents are aggregated together
+                totalAmount: { $sum: "$amount" } // Sum up the 'amount' field
+              }
+            }
+          ]);
+          const totalRevenuePending = await Invoice.aggregate([
+            {
+              $match: {
+                status:1,
+                isDraft:false,
+                isDeleted:false,
+                user_id: user_id // Match the specific user
+              }
+            },
+            {
+              $group: {
+                _id: null, // No grouping key, so all documents are aggregated together
+                totalAmount: { $sum: "$amount" } // Sum up the 'amount' field
+              }
+            }
+          ]);
+          const totalOverdue = await Invoice.aggregate([
+            {
+              $match: {
+                status:1,
+                type:2,
+                isDeleted:false,
+                isDraft:false,
+                user_id: user_id // Match the specific user
+              }
+            },
+            {
+              $group: {
+                _id: null, // No grouping key, so all documents are aggregated together
+                totalAmount: { $sum: "$amount" } // Sum up the 'amount' field
+              }
+            }
+          ]);
+
+
+        // Determine if there's a next or previous page
+       
+        res.send({
+            data:{
+                draftInvoiceTotal:draftInvoiceTotal[0]?.totalAmount,
+            totalOverdue:totalOverdue[0]?.totalAmount,
+            totalRevenue:totalRevenue[0]?.totalAmount,
+            totalRevenuePending:totalRevenuePending[0]?.totalAmount
+            }
+        });
     } catch (error) {
         next(error);
     }
