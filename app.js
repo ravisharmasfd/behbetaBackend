@@ -125,7 +125,7 @@ app.use(function (err, req, res, next) {
   const sendEmailPromise = [];
   invoices.forEach(inv => {
     const body = inv.toObject();
-    const url = `${"http://localhost:3000/payment?sessionId="}${inv._id}`
+    const url = `${"https://bahbeta-merchant-panel.vercel.app/payment?sessionId="}${inv._id}`
     const newDate = moment(body.invoice_start_date).add(repeat_every, frequencyUnit);
     let nextInvoice = new Invoice({
       ...body, invoice_start_date: newDate,

@@ -21,7 +21,7 @@ exports.createInvoice = async (req, res, next) => {
             await newInvoice.save();
             console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 3)
         }
-        const url = `${"http://localhost:3000/payment?sessionId="}${newInvoice._id}`
+        const url = `${"https://bahbeta-merchant-panel.vercel.app/payment?sessionId="}${newInvoice._id}`
 
         if (saveAsDraft) {
             console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 4)
