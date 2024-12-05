@@ -52,7 +52,6 @@ const invoiceSchema = new mongoose.Schema({
   },
   remark: {
     type: String,
-    required: true,
     default: '',
   },
   frequencyUnit: {
