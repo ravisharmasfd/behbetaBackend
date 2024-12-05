@@ -86,6 +86,14 @@ const invoiceSchema = new mongoose.Schema({
     ref:"Invoice",
     default:null,
   },
+  product:{
+    type:[],
+    default:[]
+  },
+  overdue:{
+    type:Date,
+    default: null
+  }
 }, { 
   timestamps: true 
 });

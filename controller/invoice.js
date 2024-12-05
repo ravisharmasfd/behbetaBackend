@@ -5,7 +5,7 @@ const Invoice = require("../model/invoice");
 
 exports.createInvoice = async (req, res, next) => {
     try {
-        const { amount, country_code, mobile_no, name, remark, sendAtSMS, sendAtWhatsapp, sendAtMail, saveAsDraft, email, draftId, type, invoice_start_date, repeat_every, frequencyUnit } = req.body;
+        const { amount, country_code, mobile_no, name, remark, sendAtSMS, sendAtWhatsapp, sendAtMail, saveAsDraft, email, draftId, type, invoice_start_date, repeat_every, frequencyUnit ,product,overdue} = req.body;
         console.log("🚀 ~ exports.createInvoice= ~ type:", type)
         let user_id = req?.user?._id
         let newInvoice;
@@ -16,7 +16,7 @@ exports.createInvoice = async (req, res, next) => {
         }
         else {
             newInvoice = new Invoice({
-                amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit, user_id,cronJobDone: true
+                amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, product,overdue,frequencyUnit, user_id,cronJobDone: true
             });
             await newInvoice.save();
             console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 3)
@@ -66,7 +66,7 @@ exports.createInvoice = async (req, res, next) => {
         console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 11)
         const newDate = moment(invoice_start_date).add(repeat_every, frequencyUnit);
         let nextInvoice = new Invoice({
-            amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit,user_id});
+            amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, product,overdue,frequencyUnit,user_id});
         await nextInvoice.save()
 
         // const {data} = await createPayment(amount,"BHD",newInvoice._id);
@@ -89,10 +89,24 @@ exports.getInvoices = async (req, res, next) => {
         let user_id = req?.user?._id
         // Create query object
         const query = {
-            isDraft: type === "drafts",
             isDeleted: false,
             user_id
         };
+        if(type =="drafts"){
+            query.isDraft =true;
+        }
+        if(type =="overdue"){
+            query.overdue = {
+                $lte: new Date()
+            }
+        }
+        if(type = "pending"){
+            query.status = 1;
+        }
+        if(type = "paid"){
+            query.status = 2;
+        }
+
 
         // If customerName is provided, add it to the query with a case-insensitive search
         if (customerName) {
@@ -228,12 +242,14 @@ exports.invoiceStats = async (req, res, next) => {
                 isDraft: true,
                 isDeleted: false,
                 user_id: user_id // Match the specific user
+
               }
             },
             {
               $group: {
                 _id: null, // No grouping key, so all documents are aggregated together
-                totalAmount: { $sum: "$amount" } // Sum up the 'amount' field
+                totalAmount: { $sum: "$amount" }, // Sum up the 'amount' field,
+                totalNumber: {$sum:1}
               }
             }
           ]);
@@ -247,7 +263,8 @@ exports.invoiceStats = async (req, res, next) => {
             {
               $group: {
                 _id: null, // No grouping key, so all documents are aggregated together
-                totalAmount: { $sum: "$amount" } // Sum up the 'amount' field
+               totalAmount: { $sum: "$amount" }, // Sum up the 'amount' field,
+                totalNumber: {$sum:1}
               }
             }
           ]);
@@ -263,7 +280,8 @@ exports.invoiceStats = async (req, res, next) => {
             {
               $group: {
                 _id: null, // No grouping key, so all documents are aggregated together
-                totalAmount: { $sum: "$amount" } // Sum up the 'amount' field
+               totalAmount: { $sum: "$amount" }, // Sum up the 'amount' field,
+                totalNumber: {$sum:1}
               }
             }
           ]);
@@ -271,16 +289,20 @@ exports.invoiceStats = async (req, res, next) => {
             {
               $match: {
                 status:1,
-                type:2,
+                type:1,
                 isDeleted:false,
                 isDraft:false,
+                overdue:{
+                    $lte:new Date()
+                },
                 user_id: user_id // Match the specific user
               }
             },
             {
               $group: {
                 _id: null, // No grouping key, so all documents are aggregated together
-                totalAmount: { $sum: "$amount" } // Sum up the 'amount' field
+               totalAmount: { $sum: "$amount" }, // Sum up the 'amount' field,
+                totalNumber: {$sum:1}
               }
             }
           ]);
@@ -293,7 +315,11 @@ exports.invoiceStats = async (req, res, next) => {
                 draftInvoiceTotal:draftInvoiceTotal[0]?.totalAmount,
             totalOverdue:totalOverdue[0]?.totalAmount,
             totalRevenue:totalRevenue[0]?.totalAmount,
-            totalRevenuePending:totalRevenuePending[0]?.totalAmount
+            totalRevenuePending:totalRevenuePending[0]?.totalAmount,
+            draftInvoiceTotalNumber:draftInvoiceTotal[0]?.totalNumber,
+            totalOverdueNumber:totalOverdue[0]?.totalNumber,
+            totalRevenueNumber:totalRevenue[0]?.totalNumber,
+            totalRevenuePendingNumber:totalRevenuePending[0]?.totalNumber
             }
         });
     } catch (error) {
