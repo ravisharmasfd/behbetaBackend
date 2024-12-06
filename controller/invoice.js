@@ -100,10 +100,10 @@ exports.getInvoices = async (req, res, next) => {
                 $lte: new Date()
             }
         }
-        if(type = "pending"){
+        if(type == "pending"){
             query.status = 1;
         }
-        if(type = "paid"){
+        if(type == "paid"){
             query.status = 2;
         }
 
