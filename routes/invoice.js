@@ -9,6 +9,7 @@ invoiceRouter.get("/",authMiddleware(2),getInvoices);
 
 invoiceRouter.delete("/:id",authMiddleware(2),deleteInvoice);
 invoiceRouter.get("/stats",authMiddleware(2),invoiceStats);
+invoiceRouter.post("/cancelInvoice/:id",authMiddleware(2),invoiceStats);
 
 
 module.exports = invoiceRouter;

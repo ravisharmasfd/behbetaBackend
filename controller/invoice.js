@@ -224,7 +224,23 @@ exports.deleteInvoice = async (req, res, next) => {
             return res.status(404).send({ message: "Invoice not found" });
         }
 
-        res.send({ message: "Invoice deleted successfully", invoice: deletedInvoice });
+        res.send({ message: "Invoice is deleted successfully", invoice: deletedInvoice });
+    } catch (error) {
+        next(error);
+    }
+};
+exports.cancelInvoice = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        // Find and delete the invoice
+        const canceledInvoice = await Invoice.findOneAndUpdate({ _id: id,user_id:req.user._id }, { $set: { status: 3 } });
+
+        if (!canceledInvoice) {
+            return res.status(404).send({ message: "Invoice not found" });
+        }
+
+        res.send({ message: "Invoice is canceled successfully", invoice: canceledInvoice });
     } catch (error) {
         next(error);
     }
