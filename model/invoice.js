@@ -92,6 +92,10 @@ const invoiceSchema = new mongoose.Schema({
   overdue:{
     type:Date,
     default: null
+  },
+  includeVAT:{
+    type: Number,
+    default: 0
   }
 }, { 
   timestamps: true 

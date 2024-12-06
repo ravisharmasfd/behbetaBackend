@@ -5,13 +5,13 @@ const Invoice = require("../model/invoice");
 
 exports.createInvoice = async (req, res, next) => {
     try {
-        const { amount, country_code, mobile_no, name, remark, sendAtSMS, sendAtWhatsapp, sendAtMail, saveAsDraft, email, draftId, type, invoice_start_date, repeat_every, frequencyUnit ,product,overdue} = req.body;
+        const { amount, country_code, mobile_no, name, remark, sendAtSMS, sendAtWhatsapp, sendAtMail, saveAsDraft, email, draftId, type, invoice_start_date, repeat_every, frequencyUnit ,product,overdue,includeVAT} = req.body;
         console.log("🚀 ~ exports.createInvoice= ~ type:", type)
         let user_id = req?.user?._id
         let newInvoice;
         console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 1)
         if (draftId) {
-            newInvoice = await Invoice.findOneAndUpdate({ _id: draftId,user_id }, { $set: { amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit,product,overdue } });
+            newInvoice = await Invoice.findOneAndUpdate({ _id: draftId,user_id }, { $set: { amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit,product,overdue ,includeVAT} });
             console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 2)
         }
         else {
@@ -66,7 +66,7 @@ exports.createInvoice = async (req, res, next) => {
         console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 11)
         const newDate = moment(invoice_start_date).add(repeat_every, frequencyUnit);
         let nextInvoice = new Invoice({
-            amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, product,overdue,frequencyUnit,user_id});
+            amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, product,overdue,frequencyUnit,user_id,includeVAT});
         await nextInvoice.save()
 
         // const {data} = await createPayment(amount,"BHD",newInvoice._id);
