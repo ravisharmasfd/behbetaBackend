@@ -11,7 +11,7 @@ exports.createInvoice = async (req, res, next) => {
         let newInvoice;
         console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 1)
         if (draftId) {
-            newInvoice = await Invoice.findOneAndUpdate({ _id: draftId,user_id }, { $set: { amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit } });
+            newInvoice = await Invoice.findOneAndUpdate({ _id: draftId,user_id }, { $set: { amount, mobile_no, name, remark, email, country_code, type, isDraft: saveAsDraft, invoice_start_date, repeat_every, frequencyUnit,product,overdue } });
             console.log("🚀 ~ exports.createInvoice= ~ newInvoice:", 2)
         }
         else {
