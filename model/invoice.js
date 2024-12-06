@@ -96,7 +96,20 @@ const invoiceSchema = new mongoose.Schema({
   includeVAT:{
     type: Number,
     default: 0
+  },
+  sendAtSMS:{
+    type: Boolean,
+    default: false
+  },
+  sendAtWhatsapp:{
+    type: Boolean,
+    default: false
+  },
+  sendAtMail:{
+    type: Boolean,
+    default: false
   }
+
 }, { 
   timestamps: true 
 });
