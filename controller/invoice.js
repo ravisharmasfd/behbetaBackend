@@ -85,12 +85,13 @@ exports.createInvoice = async (req, res, next) => {
 
 exports.getInvoices = async (req, res, next) => {
     try {
-        const { page = 1, limit = 10, type, customerName, } = req.query;
+        const { page = 1, limit = 10, type, customerName,startDate , endDate } = req.query;
         let user_id = req?.user?._id
         // Create query object
         const query = {
             isDeleted: false,
-            user_id
+            user_id,
+            isDraft:false
         };
         if(type =="drafts"){
             query.isDraft =true;
@@ -102,10 +103,22 @@ exports.getInvoices = async (req, res, next) => {
         }
         if(type == "pending"){
             query.status = 1;
+
         }
         if(type == "paid"){
             query.status = 2;
         }
+        if(startDate){
+            query.createdAt = {
+                gte: new Date(startDate)
+            }
+        }
+        if(endDate){
+            query.createdAt = {
+                lte: new Date(endDate)
+            }
+        }
+
 
 
         // If customerName is provided, add it to the query with a case-insensitive search
