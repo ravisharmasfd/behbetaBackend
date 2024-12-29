@@ -110,12 +110,12 @@ exports.getInvoices = async (req, res, next) => {
         }
         if(startDate){
             query.createdAt = {
-                gte: new Date(startDate)
+                gte: new Date(startDate).setHours(0,0,0)
             }
         }
         if(endDate){
             query.createdAt = {
-                lte: new Date(endDate)
+                lte: new Date(endDate).setHours(23,59,59)
             }
         }
 
