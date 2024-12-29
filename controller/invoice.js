@@ -108,17 +108,18 @@ exports.getInvoices = async (req, res, next) => {
         if(type == "paid"){
             query.status = 2;
         }
+        if(startDate || endDate){
+            query.createdAt = {}
+        }
         if(startDate){
-            query.createdAt = {
-                gte: new Date(startDate).setHours(0,0,0)
-            }
+            console.log("🚀 ~ exports.getInvoices= ~ startDate:", startDate)
+            query.createdAt["$gte"] =  new Date(startDate).setHours(0,0,1)
         }
         if(endDate){
-            query.createdAt = {
-                lte: new Date(endDate).setHours(23,59,59)
-            }
+            query.createdAt["$lte"]= new Date(endDate).setHours(23,59,59)
         }
-
+        
+        console.log("🚀 ~ exports.getInvoices= ~ query:", query)
 
 
         // If customerName is provided, add it to the query with a case-insensitive search
