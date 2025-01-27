@@ -120,7 +120,9 @@ const userSchema = new mongoose.Schema({
   isDeleted:{
     type: Boolean,
     default:false,
-  }
+  },
+  referralCode: { type: String, unique: true,index:true ,require:true}, // Unique code for the user
+  referredBy: { type: String,default:null },
 }, { timestamps: true });
 
 // Password hashing before saving

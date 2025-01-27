@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../model/user'); // Assuming user.js is your User schema
+const crypto = require('crypto'); // For generating referral codes
+
 const { jwtSecret } = require('../config/env');
 
 const JWT_SECRET = jwtSecret
@@ -14,7 +16,26 @@ exports.register =async (req, res, next) => {
     if (user) {
       return res.status(400).json({ message: 'User already exists' });
     }
+    let referralCode = crypto.randomBytes(4).toString('hex');
+      
+      let match = true;
+      while(!match){
+        const userByReferralCode = User.findOne({referralCode});
+        if(!userByReferralCode){
+          match = false;
+          break;
+        }
+        else{
+          referralCode = crypto.randomBytes(4).toString('hex');
+        }
 
+      }
+    if(referredBy){
+      const referralUser = await User.findOne({referralCode:referredBy});
+      if(!referralUser){
+        return res.status(400).json({ message: 'Refer code is not exist' });
+      }
+    }
     // Create a new user
     user = new User({
       first_name,
@@ -22,7 +43,8 @@ exports.register =async (req, res, next) => {
       email,
       password,
       phone_number,
-      role: 1
+      role: 1,
+      referralCode
     });
 
     // Save the user to the database

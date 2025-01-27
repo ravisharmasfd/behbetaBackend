@@ -1,5 +1,6 @@
 const User = require("../../model/user");
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto'); // For generating referral codes
 
 exports.createMerchant =async (req, res, next) => {
     try {
@@ -16,11 +17,24 @@ exports.createMerchant =async (req, res, next) => {
       if (userByUserName) {
         return res.status(400).json({ message: 'User already exists with username' });
       }
-  
-  
+      let referralCode = crypto.randomBytes(4).toString('hex');
+      
+      let match = true;
+      while(!match){
+        const userByReferralCode = User.findOne({referralCode});
+        if(!userByReferralCode){
+          match = false;
+          break;
+        }
+        else{
+          referralCode = crypto.randomBytes(4).toString('hex');
+        }
+
+      }
       // Create a new user
       user = new User({
         ...req.body,
+        referralCode,
         role: 2
       });
   
