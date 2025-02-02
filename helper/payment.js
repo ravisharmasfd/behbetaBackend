@@ -18,13 +18,15 @@ exports. createPayment = async (amount, currency,apiPassword,merchantName,orderI
             operation: "PURCHASE",
             merchant: {
                 name: merchantName
-            }
+            },
+            displayControl:{billingAddress :"HIDE"}
         },
         order: {
             currency: currency,
             amount: amount,
             id: orderId,
-            description: description
+            description: description,
+            address:"HIDE"
         }
     };
     const response = await axios.post(url, data, {
