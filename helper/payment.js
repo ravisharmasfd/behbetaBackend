@@ -15,11 +15,11 @@ exports. createPayment = async (amount, currency,apiPassword,merchantName,orderI
       const data = {
         apiOperation: "INITIATE_CHECKOUT",
         interaction: {
+          displayControl:{billingAddress :"HIDE",shipping :"HIDE"},
             operation: "PURCHASE",
             merchant: {
                 name: merchantName
             },
-            displayControl:{billingAddress :"HIDE"}
         },
         order: {
             currency: currency,
