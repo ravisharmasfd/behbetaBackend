@@ -10,7 +10,6 @@
     }
   };
 
-
   module.exports = {
-    getProfile
+    getProfile,
   }
