@@ -137,11 +137,9 @@ exports.updatePassword = async (req, res, next) => {
 
     // Validate the new password
     if (password.length < 8 || password.length > 25) {
-      return res
-        .status(400)
-        .json({
-          message: "New password must be between 8 and 25 characters long",
-        });
+      return res.status(400).json({
+        message: "New password must be between 8 and 25 characters long",
+      });
     }
 
     // Hash the new password and save
