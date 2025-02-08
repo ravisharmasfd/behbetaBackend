@@ -35,7 +35,6 @@ exports. createPayment = async (amount, currency,apiPassword,merchantName,orderI
             amount: amount,
             id: orderId,
             description: description,
-            address:"HIDE"
         }
     };
     const response = await axios.post(url, data, {
@@ -48,7 +47,7 @@ exports. createPayment = async (amount, currency,apiPassword,merchantName,orderI
                 
         return response.data
     } catch (error) {
-        console.log("🚀 ~ createPayment ~ error:", error)
+        console.log("🚀 ~ createPayment ~ error:", error?.response?.data)
         throw error
         
     }
@@ -109,6 +108,7 @@ exports.sendEmail = async(email, url,amount,businessName) => {
       console.log("🚀 ~ exports.sendEmail=async ~ response:", response)
       return response;
     } catch (err) {
+      console.log("🚀 ~ exports.sendEmail=async ~ err:", err)
       throw err;
     }
   },
