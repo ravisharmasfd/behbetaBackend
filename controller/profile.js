@@ -12,8 +12,8 @@ const getProfileMerchant = async (req, res, next) => {
 
 const inviteUser = async (req, res, next) => {
   try {
-    const {email,name} = req.body;
-    await sendInviteEmail(email,req.user,name)
+    const { email, name } = req.body;
+    await sendInviteEmail(email, req.user, name);
     res.json({});
   } catch (error) {
     next(error);
@@ -22,5 +22,5 @@ const inviteUser = async (req, res, next) => {
 
 module.exports = {
   getProfileMerchant,
-  inviteUser
-}
+  inviteUser,
+};

@@ -1,17 +1,34 @@
-const axios = require('axios');
-const base64 = require('base-64');
-const nodemailer =  require("nodemailer");
-const { merchantId, mailHost, mailPort, mailUser, mailPass, mail, smsClientID, smsPass, smsToken } = require('../config/env');
+const axios = require("axios");
+const base64 = require("base-64");
+const nodemailer = require("nodemailer");
+const {
+  merchantId,
+  mailHost,
+  mailPort,
+  mailUser,
+  mailPass,
+  mail,
+  smsClientID,
+  smsPass,
+  smsToken,
+} = require("../config/env");
 let transporter = nodemailer.createTransport({
   host: mailHost,
   port: mailPort,
   auth: {
     user: mailUser,
-    pass: mailPass
-  }
+    pass: mailPass,
+  },
 });
-exports. createPayment = async (amount, currency,apiPassword,merchantName,orderId,description) => {
-  const merchantID = merchantId; 
+exports.createPayment = async (
+  amount,
+  currency,
+  apiPassword,
+  merchantName,
+  orderId,
+  description,
+) => {
+  const merchantID = merchantId;
   // const apiPassword = '7ebe83414d4b2608412bcff38d54764a';
   // const merchantName = 'Navdeep';
   // const orderId = '<order_ID>';
@@ -19,42 +36,45 @@ exports. createPayment = async (amount, currency,apiPassword,merchantName,orderI
   const authString = `merchant.${merchantID}:${apiPassword}`;
   const encodedAuthString = base64.encode(authString);
   const url = `https://afs.gateway.mastercard.com/api/rest/version/72/merchant/${merchantID}/session`;
-    try {
-      const data = {
-        apiOperation: "INITIATE_CHECKOUT",
-        checkoutMode: "WEBSITE",
-        interaction: {
-          displayControl:{billingAddress :"HIDE",shipping :"HIDE"},
-            operation: "PURCHASE",
-            merchant: {
-                name: merchantName
-            },
+  try {
+    const data = {
+      apiOperation: "INITIATE_CHECKOUT",
+      checkoutMode: "WEBSITE",
+      interaction: {
+        displayControl: { billingAddress: "HIDE", shipping: "HIDE" },
+        operation: "PURCHASE",
+        merchant: {
+          name: merchantName,
         },
-        order: {
-            currency: currency,
-            amount: amount,
-            id: orderId,
-            description: description,
-        }
+      },
+      order: {
+        currency: currency,
+        amount: amount,
+        id: orderId,
+        description: description,
+      },
     };
     const response = await axios.post(url, data, {
       headers: {
-          'Content-Type': 'text/plain',
-          'Authorization': `Basic ${encodedAuthString}`
-      }
-  })
-        // console.log("🚀 ~ exports.createPayment= ~ response:", response)
-                
-        return response.data
-    } catch (error) {
-        console.log("🚀 ~ createPayment ~ error:", error?.response?.data)
-        throw error
-        
-    }
-}
-exports. getOrderStatus = async (apiPassword,orderId) => {
-  console.log("🚀 ~ exports.getOrderStatus= ~ apiPassword,orderId:", apiPassword,orderId)
-  const merchantID = merchantId; 
+        "Content-Type": "text/plain",
+        Authorization: `Basic ${encodedAuthString}`,
+      },
+    });
+    // console.log("🚀 ~ exports.createPayment= ~ response:", response)
+
+    return response.data;
+  } catch (error) {
+    console.log("🚀 ~ createPayment ~ error:", error?.response?.data);
+    throw error;
+  }
+};
+exports.getOrderStatus = async (apiPassword, orderId) => {
+  console.log(
+    "🚀 ~ exports.getOrderStatus= ~ apiPassword,orderId:",
+    apiPassword,
+    orderId,
+  );
+  const merchantID = merchantId;
   // const apiPassword = '7ebe83414d4b2608412bcff38d54764a';
   // const merchantName = 'Navdeep';
   // const orderId = '<order_ID>';
@@ -62,7 +82,7 @@ exports. getOrderStatus = async (apiPassword,orderId) => {
   const authString = `merchant.${merchantID}:${apiPassword}`;
   const encodedAuthString = base64.encode(authString);
   const url = `https://afs.gateway.mastercard.com/api/rest/version/100/merchant/${merchantID}/order/${orderId}`;
-    try {
+  try {
     //   const data = {
     //     apiOperation: "INITIATE_CHECKOUT",
     //     interaction: {
@@ -80,45 +100,43 @@ exports. getOrderStatus = async (apiPassword,orderId) => {
     // };
     const response = await axios.get(url, {
       headers: {
-        'Content-Type': 'text/plain',
-        'Authorization': `Basic ${encodedAuthString}`
-    }
-  })
-                
-        return response.data
-    } catch (error) {
-        // console.log("🚀 ~ createPayment ~ error:", error)
-        // throw error
-        
-    }
-}
-exports.sendEmail = async(email, url,amount,businessName) => {
-    try {
-      let mailOptions = {
-        from: mail, // sender address
-        to: email, // recipient address
-        subject: "Invoice Created Successfully", // Subject line
-        text: `You have received an order from ${businessName} for an amount of ${amount} BHD.\n Pay using: ${url}`, // plain text body
-        html: `<p>You have received an order from businessName for an amount of ${amount} BHD.</p>
+        "Content-Type": "text/plain",
+        Authorization: `Basic ${encodedAuthString}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    // console.log("🚀 ~ createPayment ~ error:", error)
+    // throw error
+  }
+};
+(exports.sendEmail = async (email, url, amount, businessName) => {
+  try {
+    let mailOptions = {
+      from: mail, // sender address
+      to: email, // recipient address
+      subject: "Invoice Created Successfully", // Subject line
+      text: `You have received an order from ${businessName} for an amount of ${amount} BHD.\n Pay using: ${url}`, // plain text body
+      html: `<p>You have received an order from businessName for an amount of ${amount} BHD.</p>
         <p>Pay using: </p>
         <a href=${url}>click here</a>
-        ` // HTML body
-      };
-     const response = await transporter.sendMail(mailOptions);
-      console.log("🚀 ~ exports.sendEmail=async ~ response:", response)
-      return response;
-    } catch (err) {
-      console.log("🚀 ~ exports.sendEmail=async ~ err:", err)
-      throw err;
-    }
-  },
-  exports.sendInviteEmail = async(email, user,name) => {
+        `, // HTML body
+    };
+    const response = await transporter.sendMail(mailOptions);
+    console.log("🚀 ~ exports.sendEmail=async ~ response:", response);
+    return response;
+  } catch (err) {
+    console.log("🚀 ~ exports.sendEmail=async ~ err:", err);
+    throw err;
+  }
+}),
+  (exports.sendInviteEmail = async (email, user, name) => {
     try {
-      
       let mailOptions = {
         from: mail, // sender address
         to: email, // recipient address
-        subject: "You are invited to join Bahbeta by "+user?.first_name,
+        subject: "You are invited to join Bahbeta by " + user?.first_name,
         html: `<!DOCTYPE html>
 <html lang="en">
 
@@ -234,19 +252,18 @@ exports.sendEmail = async(email, url,amount,businessName) => {
     </div>
 </body>
 
-</html>` // HTML body
+</html>`, // HTML body
       };
-     const response = await transporter.sendMail(mailOptions);
-      console.log("🚀 ~ exports.sendEmail=async ~ response:", response)
+      const response = await transporter.sendMail(mailOptions);
+      console.log("🚀 ~ exports.sendEmail=async ~ response:", response);
       return response;
     } catch (err) {
       throw err;
     }
-  },
-
-  exports.sendSms= async (phoneNumber, messageText) => {
+  }),
+  (exports.sendSms = async (phoneNumber, messageText) => {
     try {
-      console.log("phone number is",phoneNumber.slice(1))
+      console.log("phone number is", phoneNumber.slice(1));
       const clientId = smsClientID;
       const password = smsPass;
       const token = smsToken;
@@ -257,7 +274,7 @@ exports.sendEmail = async(email, url,amount,businessName) => {
         sms: {
           ver: "2.0",
           dlr: {
-            url: "" // Optional: Leave as an empty string if not required
+            url: "", // Optional: Leave as an empty string if not required
           },
           messages: [
             {
@@ -271,12 +288,12 @@ exports.sendEmail = async(email, url,amount,businessName) => {
                   from: "BahBeta", // Your sender ID
                   to: phoneNumber.slice(1), // The recipient's phone number from the request body
                   seq: "1", // Sequence number
-                  tag: "Clientsoptionalinformation" // Optional: Tag for message
-                }
-              ]
-            }
-          ]
-        }
+                  tag: "Clientsoptionalinformation", // Optional: Tag for message
+                },
+              ],
+            },
+          ],
+        },
       };
 
       // Send the request to the API
@@ -286,17 +303,22 @@ exports.sendEmail = async(email, url,amount,businessName) => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
           params: {
             clientid: clientId,
-            clientpassword: password
-          }
-        }
+            clientpassword: password,
+          },
+        },
       );
 
       // Check the response status
-      console.log("Response:", response.data,response.data.messageack,response.data.messageack.guids[0].errors);
+      console.log(
+        "Response:",
+        response.data,
+        response.data.messageack,
+        response.data.messageack.guids[0].errors,
+      );
 
       // Handle success or failure
       if (response.data.statuscode === 200) {
@@ -308,7 +330,7 @@ exports.sendEmail = async(email, url,amount,businessName) => {
       // Handle errors in the request
       console.error(
         "Error:",
-        error.response ? error.response.data : error.message
+        error.response ? error.response.data : error.message,
       );
     }
-  }
+  });

@@ -68,53 +68,51 @@ const Invoice = require("../../model/invoice");
 // }
 
 exports.getAdminInvoices = async (req, res, next) => {
-    try {
-        const { page = 1, limit = 10, customerName, } = req.query;
-        
-        // Create query object
-        const query = {
-            isDraft: false,
-            isDeleted: false,
-            user_id: {$ne:null}
-        };
+  try {
+    const { page = 1, limit = 10, customerName } = req.query;
 
-        // If customerName is provided, add it to the query with a case-insensitive search
-        if (customerName) {
-            query.customerName = { $regex: customerName, $options: "i" };
-        }
+    // Create query object
+    const query = {
+      isDraft: false,
+      isDeleted: false,
+      user_id: { $ne: null },
+    };
 
-        // Calculate total documents
-        const totalInvoices = await Invoice.find(query).countDocuments();
-
-        // Calculate total pages
-        const totalPages = Math.ceil(totalInvoices / limit);
-
-        // Fetch invoices with pagination
-        const invoices = await Invoice.find(query)
-            .populate("user_id")
-            .skip((page - 1) * limit)
-            .limit(Number(limit))
-            .sort({ createdAt: -1 }); // Sort by creation date in descending order (latest first)
-
-        // Determine if there's a next or previous page
-        const isNext = page < totalPages;
-        const isPrevious = page > 1;
-
-        res.send({
-            total: totalInvoices,
-            page: Number(page),
-            limit: Number(limit),
-            totalPages,
-            isNext,
-            isPrevious,
-            invoices
-        });
-    } catch (error) {
-        next(error);
+    // If customerName is provided, add it to the query with a case-insensitive search
+    if (customerName) {
+      query.customerName = { $regex: customerName, $options: "i" };
     }
+
+    // Calculate total documents
+    const totalInvoices = await Invoice.find(query).countDocuments();
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalInvoices / limit);
+
+    // Fetch invoices with pagination
+    const invoices = await Invoice.find(query)
+      .populate("user_id")
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .sort({ createdAt: -1 }); // Sort by creation date in descending order (latest first)
+
+    // Determine if there's a next or previous page
+    const isNext = page < totalPages;
+    const isPrevious = page > 1;
+
+    res.send({
+      total: totalInvoices,
+      page: Number(page),
+      limit: Number(limit),
+      totalPages,
+      isNext,
+      isPrevious,
+      invoices,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
-
-
 
 // exports.deleteInvoice = async (req, res, next) => {
 //     try {

@@ -1,18 +1,17 @@
 const app = require("./app");
 const { port } = require("./config/env");
-const { connectDatabase } = require("./db")
+const { connectDatabase } = require("./db");
 
-const server = async ()=>{
-try {
-    console.log("server is running")
+const server = async () => {
+  try {
+    console.log("server is running");
     await connectDatabase();
-    app.listen(port,()=>{
-        console.log("server is running on port ",port);
-    })
-   
-} catch (error) {
-    console.log("🚀 ~ server ~ error:", error)
-    server()
-}
-}
-server()
+    app.listen(port, () => {
+      console.log("server is running on port ", port);
+    });
+  } catch (error) {
+    console.log("🚀 ~ server ~ error:", error);
+    server();
+  }
+};
+server();
