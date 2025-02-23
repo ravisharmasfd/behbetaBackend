@@ -12,3 +12,6 @@ exports.mail = process.env.MAIL;
 exports.smsClientID = process.env.SMS_CLIENTID;
 exports.smsPass = process.env.SMS_PASSWORD;
 exports.smsToken = process.env.SMS_TOKEN;
+exports.cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME;
+exports.cloudinaryCloudKey = process.env.CLOUDINARY_CLOUD_KEY;
+exports.cloudinaryCloudSecret = process.env.CLOUDINARY_CLOUD_SECRET;
